@@ -49,9 +49,9 @@ Route::get('/faq', function () {
 Route::get('/campaigns', [CampaignController::class, 'explore'])->name('campaigns.index');
 Route::get('/campaigns/{campaign:slug}', [CampaignController::class, 'show'])->name('campaigns.show');
 
-// Donation routes
+// Donation routes with rate limiting
 Route::get('/campaigns/{campaign:slug}/donate', [DonationController::class, 'create'])->name('donations.create');
-Route::post('/campaigns/{campaign:slug}/donate', [DonationController::class, 'store'])->name('donations.store');
+Route::post('/campaigns/{campaign:slug}/donate', [DonationController::class, 'store'])->name('donations.store')->middleware('rate.limit:donation,5,1');
 Route::get('/donations/{transaction:ref_id}/show', [DonationController::class, 'show'])->name('donations.show');
 Route::get('/donations/{transaction:ref_id}/success', [DonationController::class, 'success'])->name('donations.success');
 
@@ -81,12 +81,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('role:donor:creator')
         ->name('dashboard');
 
-    // Campaign management routes - only for creator role
-    Route::middleware('resource.role:campaigns:creator')->group(function () {
+    // Campaign management routes - only for creator role with rate limiting and file upload security
+    Route::middleware(['resource.role:campaigns:creator', 'secure.upload'])->group(function () {
         Route::get('/campaign/create', [CampaignController::class, 'create'])->name('campaigns.create');
-        Route::post('/campaign', [CampaignController::class, 'store'])->name('campaigns.store');
+        Route::post('/campaign', [CampaignController::class, 'store'])->name('campaigns.store')->middleware('rate.limit:campaign,3,10');
         Route::get('/campaign/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit');
-        Route::put('/campaign/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update');
+        Route::put('/campaign/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update')->middleware('rate.limit:campaign,5,10');
         Route::delete('/campaign/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
     });
 
@@ -123,7 +123,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 // Campaign Share API routes - outside auth middleware to avoid Inertia conflicts
-Route::prefix('api/campaigns')->middleware(['web'])->group(function () {
+Route::prefix('api/campaigns')->middleware(['web', 'rate.limit:share,30,1'])->group(function () {
     Route::post('/share-track', [CampaignShareController::class, 'trackShare'])->name('campaigns.share.track');
     Route::get('/{campaign}/share-stats', [CampaignShareController::class, 'getShareStats'])->name('campaigns.share.stats');
     Route::get('/share-stats/global', [CampaignShareController::class, 'getGlobalStats'])->name('campaigns.share.global');

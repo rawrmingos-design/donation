@@ -6,6 +6,8 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Str;
+use App\Rules\SecureInput;
+use App\Rules\StrongPassword;
 
 class RegisterRequest extends FormRequest
 {
@@ -25,9 +27,9 @@ class RegisterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'name' => ['required', 'string', 'max:255', new SecureInput()],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users', new SecureInput()],
+            'password' => ['required', 'string', 'confirmed', new StrongPassword()],
         ];
     }
 
