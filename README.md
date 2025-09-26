@@ -50,7 +50,7 @@
 
 1. **Donor** - Dapat berdonasi ke kampanye (guest atau registered user)
 2. **Campaign Creator** - Dapat membuat dan mengelola kampanye donasi
-3. **Admin** - Mengelola seluruh platform melalui Filament admin panel
+3. **Super Admin** - Mengelola seluruh platform melalui Filament admin panel
 
 ## ✨ **Comprehensive Feature Set**
 
@@ -319,9 +319,9 @@ php artisan event:cache
 Setelah menjalankan seeder, gunakan kredensial berikut untuk testing:
 
 ### **🛠️ Admin Panel** (`/admin`)
-- **Email**: `admin@donation.com`
+- **Email**: `superadmin@donation.com`
 - **Password**: `password`
-- **Role**: Administrator
+- **Role**: Super Admin
 - **Access**: Full platform management
 
 ### **🎯 Campaign Creator** (`/dashboard`)
