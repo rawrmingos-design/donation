@@ -198,7 +198,6 @@ export default function DonationCreate({ campaign, paymentProviders }: Props) {
         }
     };
 
-    console.log(campaign);
 
     const showLoading = () => {
         return (

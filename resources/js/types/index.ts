@@ -43,7 +43,6 @@ export interface Campaign {
     user: User;
     category: Category;
     donations?: Donation[];
-    campaign_updates?: CampaignUpdate[];
     comments?: Comment[];
     
     // Computed attributes
@@ -122,17 +121,6 @@ export interface Transaction {
     paymentChannel: PaymentChannel;
 }
 
-export interface CampaignUpdate {
-    id: number;
-    campaign_id: number;
-    title: string;
-    content: string;
-    created_at: string;
-    updated_at: string;
-    
-    // Relationships
-    campaign: Campaign;
-}
 
 export interface Comment {
     id: number;

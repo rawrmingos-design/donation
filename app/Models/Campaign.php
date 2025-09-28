@@ -81,10 +81,6 @@ class Campaign extends Model
         return $this->hasMany(Donation::class);
     }
 
-    public function campaignUpdates(): HasMany
-    {
-        return $this->hasMany(CampaignUpdate::class);
-    }
 
     public function comments(): HasMany
     {

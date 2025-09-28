@@ -15,23 +15,12 @@ class SecurityHeadersMiddleware
     {
         $response = $next($request);
 
-        // Content Security Policy
-        $csp = [
-            "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://checkout.stripe.com",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
-            "font-src 'self' https://fonts.gstatic.com https://cdn.jsdelivr.net",
-            "img-src 'self' data: https: blob:",
-            "connect-src 'self' https://api.stripe.com https://checkout.stripe.com",
-            "frame-src 'self' https://js.stripe.com https://checkout.stripe.com",
-            "object-src 'none'",
-            "base-uri 'self'",
-            "form-action 'self'",
-            "frame-ancestors 'none'",
-            "upgrade-insecure-requests"
-        ];
-
-        $response->headers->set('Content-Security-Policy', implode('; ', $csp));
+        // Different CSP policies for different environments
+        if (config('app.env') === 'local') {
+            $this->setDevelopmentCSP($response);
+        } else {
+            $this->setProductionCSP($response);
+        }
 
         // Security Headers
         $response->headers->set('X-Content-Type-Options', 'nosniff');
@@ -50,5 +39,50 @@ class SecurityHeadersMiddleware
         $response->headers->remove('X-Powered-By');
 
         return $response;
+    }
+
+    /**
+     * Set development CSP - very permissive for local development
+     */
+    private function setDevelopmentCSP(Response $response): void
+    {
+        // Very permissive CSP for development - allows all sources
+        $csp = [
+            "default-src *",
+            "script-src * 'unsafe-inline' 'unsafe-eval'",
+            "style-src * 'unsafe-inline'",
+            "font-src * data:",
+            "img-src * data: blob:",
+            "connect-src *",
+            "frame-src *",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action *"
+        ];
+
+        $response->headers->set('Content-Security-Policy', implode('; ', $csp));
+    }
+
+    /**
+     * Set production CSP - strict security policy
+     */
+    private function setProductionCSP(Response $response): void
+    {
+        $csp = [
+            "default-src 'self'",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://checkout.stripe.com https://api.tokopay.id https://checkout.tokopay.id",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://checkout.tokopay.id",
+            "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdn.jsdelivr.net",
+            "img-src 'self' data: https: blob: https://checkout.tokopay.id https://api.tokopay.id",
+            "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://api.tokopay.id https://checkout.tokopay.id https://fonts.bunny.net",
+            "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://checkout.tokopay.id",
+            "object-src 'none'",
+            "base-uri 'self'",
+            "form-action 'self' https://checkout.tokopay.id",
+            "frame-ancestors 'none'",
+            "upgrade-insecure-requests"
+        ];
+
+        $response->headers->set('Content-Security-Policy', implode('; ', $csp));
     }
 }

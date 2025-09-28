@@ -36,6 +36,8 @@ class DatabaseSeeder extends Seeder
             
             // 6. Financial data - depends on campaigns with funds
             WithdrawalSeeder::class,        // Depends on: Campaign (with funds), User (creator & admin)
+            NotificationSeeder::class,      // Depends on: Campaign (with funds), User (creator & admin)
+            CampaignShareSeeder::class,     // Depends on: Campaign (with funds), User (creator & admin)
         ]);
     }
 }

@@ -38,16 +38,10 @@ class CampaignController extends Controller
         ]);
         
         // Get pagination parameters
-        $updatesPage = $request->get('updates_page', 1);
         $donationsPage = $request->get('donations_page', 1);
         $commentsPage = $request->get('comments_page', 1);
         $activePage = $request->get('active_page', 1);
         $perPage = 10; // Items per page for each section
-        
-        // Get paginated updates
-        $updates = $campaign->campaignUpdates()
-            ->latest()
-            ->paginate($perPage, ['*'], 'updates_page', $updatesPage);
         
         // Get paginated donations
         $donations = $campaign->donations()
@@ -65,7 +59,6 @@ class CampaignController extends Controller
         return Inertia::render('Campaigns/Show', [
             'activePage' => $activePage,
             'campaign' => $campaignData,
-            'updates' => $updates,
             'donations' => $donations,
             'comments' => $comments,
         ]);

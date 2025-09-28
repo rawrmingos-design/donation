@@ -183,7 +183,7 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
                                         <div className="relative h-40 sm:h-48 bg-gray-700">
                                             {campaign.featured_image ? (
                                                 <img
-                                                    src={`/storage/${campaign.featured_image}`}
+                                                    src={`/storage/campaigns/${campaign.featured_image}`}
                                                     alt={campaign.title}
                                                     className="w-full h-full object-cover"
                                                 />

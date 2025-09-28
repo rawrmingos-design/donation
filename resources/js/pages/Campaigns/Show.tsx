@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '@/layouts/PublicLayout';
-import { Campaign, User, Comment, CampaignUpdate, Donation } from '@/types';
+import { Campaign, User, Comment, Donation } from '@/types';
 import SocialShareButtons from '@/components/SocialShare/SocialShareButtons';
 import ShareAnalytics from '@/components/SocialShare/ShareAnalytics';
 import toast from 'react-hot-toast';
@@ -27,7 +27,6 @@ interface PaginatedData<T> {
 
 interface Props {
     campaign: Campaign;
-    updates: PaginatedData<CampaignUpdate>;
     donations: PaginatedData<Donation>;
     comments: PaginatedData<Comment>;
     activePage: number;
@@ -37,9 +36,8 @@ interface Props {
     };
 }
 
-export default function CampaignShow({ campaign, updates, donations, comments, activePage, error, auth }: Props) {
+export default function CampaignShow({ campaign, donations, comments, activePage, error, auth }: Props) {
     const [activeTab, setActiveTab] = useState('description');
-    const [currentUpdatesPage, setCurrentUpdatesPage] = useState(updates.current_page);
     const [currentDonationsPage, setCurrentDonationsPage] = useState(donations.current_page);
     const [currentCommentsPage, setCurrentCommentsPage] = useState(comments.current_page);
     const [commentsData, setCommentsData] = useState(comments);
@@ -98,14 +96,12 @@ export default function CampaignShow({ campaign, updates, donations, comments, a
         });
     };
 
-    console.log(campaign.collected_amount);
 
 
     const daysLeft = campaign.deadline 
         ? Math.max(0, Math.ceil((new Date(campaign.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
         : null;
 
-        console.log(campaign);
 
     return (
         <PublicLayout title={campaign.title} currentPage="campaigns">
@@ -223,7 +219,6 @@ export default function CampaignShow({ campaign, updates, donations, comments, a
                                     <nav className="-mb-px flex space-x-8">
                                         {[
                                             { key: 'description', label: 'Deskripsi' },
-                                            { key: 'updates', label: `Update (${updates.total})` },
                                             { key: 'donations', label: `Donasi (${donations.total})` },
                                             { key: 'comments', label: `Komentar (${comments.total})` },
                                         ].map((tab) => (
@@ -250,41 +245,6 @@ export default function CampaignShow({ campaign, updates, donations, comments, a
                                         </div>
                                     )}
 
-                                    {activeTab === 'updates' && (
-                                        <div className="space-y-6">
-                                            {updates.data.map((update) => (
-                                                <div key={update.id} className="border-l-4 bg-gray-800 border border-gray-500 pl-4">
-                                                    <h3 className="font-semibold text-lg">{update.title}</h3>
-                                                    <p className="text-sm text-gray-300 mb-2">
-                                                        {formatDate(update.created_at)}
-                                                    </p>
-                                                    <div className="html-content">
-                                                        {update.content ? parse(update.content) : null}
-                                                    </div>
-                                                </div>
-                                            ))}
-                                            {updates.data.length === 0 && (
-                                                <p className="text-gray-500">Belum ada update untuk kampanye ini.</p>
-                                            )}
-                                            
-                                            {/* Updates Pagination */}
-                                            {updates.last_page > 1 && (
-                                                <div className="mt-6">
-                                                    <Pagination
-                                                        data={{
-                                                            ...updates,
-                                                            first_page_url: `/campaigns/${campaign.slug}?updates_page=1`,
-                                                            last_page_url: `/campaigns/${campaign.slug}?updates_page=${updates.last_page}`,
-                                                            next_page_url: updates.current_page < updates.last_page ? `/campaigns/${campaign.slug}?updates_page=${updates.current_page + 1}` : null,
-                                                            prev_page_url: updates.current_page > 1 ? `/campaigns/${campaign.slug}?updates_page=${updates.current_page - 1}` : null,
-                                                            path: `/campaigns/${campaign.slug}`
-                                                        }}
-                                                        preserveScroll={true}
-                                                    />
-                                                </div>
-                                            )}
-                                        </div>
-                                    )}
 
                                     {activeTab === 'donations' && (
                                         <div className="space-y-4">

@@ -51,7 +51,7 @@ Route::get('/campaigns/{campaign:slug}', [CampaignController::class, 'show'])->n
 
 // Donation routes with rate limiting
 Route::get('/campaigns/{campaign:slug}/donate', [DonationController::class, 'create'])->name('donations.create');
-Route::post('/campaigns/{campaign:slug}/donate', [DonationController::class, 'store'])->name('donations.store')->middleware('rate.limit:donation,5,1');
+Route::post('/campaigns/{campaign:slug}/donate', [DonationController::class, 'store'])->name('donations.store')->middleware('rate.limit:donation,10,2');
 Route::get('/donations/{transaction:ref_id}/show', [DonationController::class, 'show'])->name('donations.show');
 Route::get('/donations/{transaction:ref_id}/success', [DonationController::class, 'success'])->name('donations.success');
 
@@ -84,9 +84,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Campaign management routes - only for creator role with rate limiting and file upload security
     Route::middleware(['resource.role:campaigns:creator', 'secure.upload'])->group(function () {
         Route::get('/campaign/create', [CampaignController::class, 'create'])->name('campaigns.create');
-        Route::post('/campaign', [CampaignController::class, 'store'])->name('campaigns.store')->middleware('rate.limit:campaign,3,10');
+        Route::post('/campaign', [CampaignController::class, 'store'])->name('campaigns.store')->middleware('rate.limit:campaign,5,10');
         Route::get('/campaign/{campaign}/edit', [CampaignController::class, 'edit'])->name('campaigns.edit');
-        Route::put('/campaign/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update')->middleware('rate.limit:campaign,5,10');
+        Route::put('/campaign/{campaign}', [CampaignController::class, 'update'])->name('campaigns.update')->middleware('rate.limit:campaign,10,10');
         Route::delete('/campaign/{campaign}', [CampaignController::class, 'destroy'])->name('campaigns.destroy');
     });
 

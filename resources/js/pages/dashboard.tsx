@@ -103,7 +103,6 @@ export default function Dashboard({ auth, fundraiserApplications = [], campaigns
         }
     };
 
-    console.log(campaigns);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

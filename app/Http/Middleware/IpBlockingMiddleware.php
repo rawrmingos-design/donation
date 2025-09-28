@@ -17,6 +17,11 @@ class IpBlockingMiddleware
     {
         $ip = $request->ip();
         
+        // Skip IP blocking for development environment
+        if (config('app.env') === 'local') {
+            return $next($request);
+        }
+        
         // Check if IP is permanently blocked
         if ($this->isPermanentlyBlocked($ip)) {
             Log::warning('Blocked IP attempted access', [
@@ -47,8 +52,10 @@ class IpBlockingMiddleware
             return $next($request);
         }
         
-        // Monitor suspicious activity
-        $this->monitorSuspiciousActivity($request);
+        // Monitor suspicious activity (only for non-GET requests)
+        if (!$request->isMethod('GET')) {
+            $this->monitorSuspiciousActivity($request);
+        }
         
         return $next($request);
     }
@@ -84,20 +91,16 @@ class IpBlockingMiddleware
     protected function monitorSuspiciousActivity(Request $request): void
     {
         $ip = $request->ip();
-        $key = "suspicious_activity:{$ip}";
         
-        // Increment suspicious activity counter
-        $count = Cache::increment($key, 1);
-        
-        // Set expiry if this is the first increment
-        if ($count === 1) {
-            Cache::put($key, 1, now()->addHour());
-        }
-        
-        // Check for suspicious patterns
+        // Only check for actually suspicious patterns, not every request
         if ($this->isSuspiciousRequest($request)) {
-            Cache::increment("suspicious_requests:{$ip}", 1);
-            Cache::put("suspicious_requests:{$ip}", Cache::get("suspicious_requests:{$ip}", 0), now()->addHour());
+            $key = "suspicious_requests:{$ip}";
+            $count = Cache::increment($key, 1);
+            
+            // Set expiry if this is the first increment
+            if ($count === 1) {
+                Cache::put($key, 1, now()->addHour());
+            }
             
             Log::warning('Suspicious request detected', [
                 'ip' => $ip,
@@ -106,17 +109,18 @@ class IpBlockingMiddleware
                 'user_agent' => $request->userAgent(),
                 'input' => $request->except(['password', 'password_confirmation']),
             ]);
-        }
-        
-        // Auto-block if threshold exceeded
-        $suspiciousCount = Cache::get("suspicious_requests:{$ip}", 0);
-        if ($suspiciousCount >= config('security.monitoring.failure_threshold', 10)) {
-            $this->temporarilyBlockIp($ip, 3600); // 1 hour
             
-            Log::alert('IP automatically blocked due to suspicious activity', [
-                'ip' => $ip,
-                'suspicious_count' => $suspiciousCount,
-            ]);
+            // Auto-block if threshold exceeded (increased threshold)
+            $threshold = config('security.monitoring.failure_threshold', 25); // Increased from 10 to 25
+            if ($count >= $threshold) {
+                $this->temporarilyBlockIp($ip, 300); // 5 minutes
+                
+                Log::alert('IP automatically blocked due to suspicious activity', [
+                    'ip' => $ip,
+                    'suspicious_count' => $count,
+                    'threshold' => $threshold,
+                ]);
+            }
         }
     }
     
@@ -125,39 +129,78 @@ class IpBlockingMiddleware
      */
     protected function isSuspiciousRequest(Request $request): bool
     {
+        // Skip checking for authenticated users (they're likely legitimate)
+        if ($request->user()) {
+            return false;
+        }
+        
+        // Skip checking for safe routes
+        if ($this->isSafeRoute($request)) {
+            return false;
+        }
+        
         $suspiciousPatterns = [
-            // SQL injection attempts
+            // SQL injection attempts (more specific patterns)
             '/(\bunion\b.*\bselect\b)|(\bselect\b.*\bunion\b)/i',
             '/\b(select|insert|update|delete|drop)\b.*\b(from|into|table)\b/i',
+            '/\'\s*(or|and)\s*\'/i',
             
-            // XSS attempts
-            '/<script[^>]*>/i',
-            '/javascript:/i',
-            '/on\w+\s*=/i',
+            // XSS attempts (more specific)
+            '/<script[^>]*>.*<\/script>/i',
+            '/javascript:\s*[^;]/i',
+            '/on(load|click|error|focus)\s*=/i',
             
-            // Path traversal
-            '/\.\.\//',
-            '/\.\.\\\\/',
+            // Path traversal (more specific)
+            '/\.\.\/.*\.\.\//',
+            '/\.\.\\\\.*\.\.\\\\/',
             
-            // Command injection
-            '/[;&|`$(){}]/i',
+            // Command injection (exclude common characters)
+            '/[;&|`]\s*(rm|cat|ls|wget|curl|nc|bash)/i',
         ];
         
-        $requestData = json_encode([
-            'url' => $request->fullUrl(),
-            'input' => $request->all(),
-        ]);
+        // Only check input data, not URLs (URLs can contain legitimate special chars)
+        $inputData = json_encode($request->except(['_token', '_method']));
         
         foreach ($suspiciousPatterns as $pattern) {
-            if (preg_match($pattern, $requestData)) {
+            if (preg_match($pattern, $inputData)) {
                 return true;
             }
         }
         
-        // Check for rapid requests (more than 100 requests per minute)
+        // Check for rapid requests (increased threshold for development)
+        $threshold = config('app.env') === 'local' ? 500 : 200; // Much higher threshold
         $requestCount = Cache::get("request_count:{$request->ip()}", 0);
-        if ($requestCount > 100) {
+        if ($requestCount > $threshold) {
             return true;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Check if route is safe and shouldn't be monitored aggressively
+     */
+    protected function isSafeRoute(Request $request): bool
+    {
+        $safeRoutes = [
+            '/',
+            '/campaigns',
+            '/campaigns/*',
+            '/about',
+            '/contact',
+            '/faq',
+            '/terms-of-service',
+            '/privacy-policy',
+            '/how-it-works',
+            '/dashboard',
+        ];
+        
+        $currentPath = $request->path();
+        
+        foreach ($safeRoutes as $route) {
+            if ($route === $currentPath || (str_ends_with($route, '*') && str_starts_with($currentPath, rtrim($route, '*')))) {
+                return true;
+            }
         }
         
         return false;

@@ -43,7 +43,6 @@ export interface Campaign {
   category: Category;
   user: User;
   donations?: Donation[];
-  campaignUpdates?: CampaignUpdate[];
   comments?: Comment[];
 }
 
@@ -72,12 +71,6 @@ export interface Donation {
   donor?: User;
 }
 
-export interface CampaignUpdate {
-  id: number;
-  title: string;
-  content: string;
-  created_at: string;
-}
 
 export interface Comment {
   id: number;

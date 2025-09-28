@@ -56,7 +56,7 @@ export default function Home({ urgentCampaigns = [], featuredCampaigns = [], sta
             <section className="relative bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900 overflow-hidden">
                 <div className="absolute inset-0 bg-black/20"></div>
                 <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-32">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+                    <div className="flex flex-col flex-col-reverse w-full lg:flex-row gap-8 lg:gap-12 items-center">
                         <div className="text-center lg:text-left order-2 lg:order-1">
                             <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold text-white mb-4 sm:mb-6 leading-tight">
                                 Wujudkan
@@ -83,7 +83,7 @@ export default function Home({ urgentCampaigns = [], featuredCampaigns = [], sta
                             </div>
                         </div>
                         
-                        <div className="relative order-1 lg:order-2">
+                        <div className="relative order-1 lg:order-2 w-full">
                             <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 border border-white/20 mx-4 sm:mx-0">
                                 <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-6">
                                     <div className="text-center">
@@ -143,7 +143,7 @@ export default function Home({ urgentCampaigns = [], featuredCampaigns = [], sta
                                 <div key={campaign.id} className="bg-gray-800 rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 sm:hover:-translate-y-2 mx-4 sm:mx-0">
                                     <div className="relative">
                                         <img 
-                                            src={campaign.featured_image ? `/storage/${campaign.featured_image}` : '/placeholder-campaign.jpg'} 
+                                            src={campaign.featured_image ? `/storage/campaigns/${campaign.featured_image}` : '/placeholder-campaign.jpg'} 
                                             alt={campaign.title}
                                             className="w-full h-40 sm:h-48 object-cover"
                                         />
