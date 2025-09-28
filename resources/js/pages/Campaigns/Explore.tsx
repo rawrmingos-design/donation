@@ -32,6 +32,7 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [selectedCategory, setSelectedCategory] = useState(filters.category || 'all');
     const [selectedStatus, setSelectedStatus] = useState(filters.status || 'all');
+    const [isInitialized, setIsInitialized] = useState(false);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -45,19 +46,28 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
         return target > 0 ? (collected / target) * 100 : 0;
     };
 
+    // Initialize component
+    useEffect(() => {
+        setIsInitialized(true);
+    }, []);
+
     // Handle filter changes with debounce for search
     useEffect(() => {
+        if (!isInitialized) return; // Don't trigger on initial mount
+        
         const timeoutId = setTimeout(() => {
             handleFilterChange();
         }, 500);
         return () => clearTimeout(timeoutId);
-    }, [searchQuery]);
+    }, [searchQuery, isInitialized]);
 
     const handleFilterChange = () => {
         const params: any = {};
         if (searchQuery) params.search = searchQuery;
         if (selectedCategory !== 'all') params.category = selectedCategory;
         if (selectedStatus !== 'all') params.status = selectedStatus;
+        // Reset to page 1 when filters change
+        params.page = 1;
         
         router.get('/campaigns', params, {
             preserveState: true,
@@ -71,6 +81,8 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
         if (searchQuery) params.search = searchQuery;
         if (category !== 'all') params.category = category;
         if (selectedStatus !== 'all') params.status = selectedStatus;
+        // Reset to page 1 when category changes
+        params.page = 1;
         
         router.get('/campaigns', params, {
             preserveState: true,
@@ -84,6 +96,8 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
         if (searchQuery) params.search = searchQuery;
         if (selectedCategory !== 'all') params.category = selectedCategory;
         if (status !== 'all') params.status = status;
+        // Reset to page 1 when status changes
+        params.page = 1;
         
         router.get('/campaigns', params, {
             preserveState: true,
