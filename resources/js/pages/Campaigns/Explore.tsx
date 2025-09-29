@@ -51,15 +51,24 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
         setIsInitialized(true);
     }, []);
 
-    // Handle filter changes with debounce for search
-    useEffect(() => {
-        if (!isInitialized) return; // Don't trigger on initial mount
+    // Handle search with manual debounce
+    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
+    
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
         
-        const timeoutId = setTimeout(() => {
+        // Clear existing timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        // Set new timeout for search
+        const newTimeout = setTimeout(() => {
             handleFilterChange();
         }, 500);
-        return () => clearTimeout(timeoutId);
-    }, [searchQuery, isInitialized]);
+        
+        setSearchTimeout(newTimeout);
+    };
 
     const handleFilterChange = () => {
         const params: any = {};
@@ -133,7 +142,7 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
                                     type="text"
                                     placeholder="Masukkan kata kunci..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) => handleSearchChange(e.target.value)}
                                     className="w-full px-3 sm:px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                                 />
                             </div>

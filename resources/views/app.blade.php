@@ -42,10 +42,18 @@
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
 
-        <!-- Midtrans Snap.js -->
-        <script type="text/javascript"
-            src="https://app.sandbox.midtrans.com/snap/snap.js"
-            data-client-key="{{ config('services.midtrans.client_key') }}"></script>
+        <!-- Midtrans Snap.js - Environment specific -->
+        @if(config('services.midtrans.is_production', false))
+            <script type="text/javascript"
+                src="https://app.midtrans.com/snap/snap.js"
+                data-client-key="{{ config('services.midtrans.client_key') }}"
+                crossorigin="anonymous"></script>
+        @else
+            <script type="text/javascript"
+                src="https://app.sandbox.midtrans.com/snap/snap.js"
+                data-client-key="{{ config('services.midtrans.client_key') }}"
+                crossorigin="anonymous"></script>
+        @endif
 
         @viteReactRefresh
         @vite(['resources/js/app.tsx', "resources/js/pages/{$page['component']}.tsx"])

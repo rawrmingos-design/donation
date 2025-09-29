@@ -17,7 +17,8 @@ class SecurityHeadersMiddleware
 
         // Different CSP policies for different environments
         if (config('app.env') === 'local') {
-            $this->setDevelopmentCSP($response);
+            // $this->setDevelopmentCSP($response);
+            return $response;   
         } else {
             $this->setProductionCSP($response);
         }
@@ -28,6 +29,7 @@ class SecurityHeadersMiddleware
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+
         
         // HSTS (HTTP Strict Transport Security)
         if ($request->secure()) {
@@ -46,9 +48,8 @@ class SecurityHeadersMiddleware
      */
     private function setDevelopmentCSP(Response $response): void
     {
-        // Very permissive CSP for development - allows all sources
         $csp = [
-            "default-src *",
+            "default-src * 'unsafe-inline' 'unsafe-eval'",
             "script-src * 'unsafe-inline' 'unsafe-eval'",
             "style-src * 'unsafe-inline'",
             "font-src * data:",
@@ -57,7 +58,8 @@ class SecurityHeadersMiddleware
             "frame-src *",
             "object-src 'none'",
             "base-uri 'self'",
-            "form-action *"
+            "form-action *",
+            "frame-ancestors *"
         ];
 
         $response->headers->set('Content-Security-Policy', implode('; ', $csp));
@@ -70,15 +72,15 @@ class SecurityHeadersMiddleware
     {
         $csp = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://checkout.stripe.com https://api.tokopay.id https://checkout.tokopay.id",
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://checkout.tokopay.id",
-            "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdn.jsdelivr.net",
-            "img-src 'self' data: https: blob: https://checkout.tokopay.id https://api.tokopay.id",
-            "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://api.tokopay.id https://checkout.tokopay.id https://fonts.bunny.net",
-            "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://checkout.tokopay.id",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://js.stripe.com https://checkout.stripe.com https://api.tokopay.id https://checkout.tokopay.id https://app.sandbox.midtrans.com https://app.midtrans.com https://api.sandbox.midtrans.com https://api.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io https://pay.google.com https://js-agent.newrelic.com https://bam.nr-data.net",
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.bunny.net https://cdn.jsdelivr.net https://checkout.tokopay.id https://app.sandbox.midtrans.com https://app.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io",
+            "font-src 'self' https://fonts.gstatic.com https://fonts.bunny.net https://cdn.jsdelivr.net https://snap-assets.al-pc-id-b.cdn.gtflabs.io",
+            "img-src 'self' data: https: blob: https://checkout.tokopay.id https://api.tokopay.id https://app.sandbox.midtrans.com https://app.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io",
+            "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://api.tokopay.id https://checkout.tokopay.id https://fonts.bunny.net https://app.sandbox.midtrans.com https://app.midtrans.com https://api.sandbox.midtrans.com https://api.midtrans.com https://snap-assets.al-pc-id-b.cdn.gtflabs.io https://js-agent.newrelic.com https://bam.nr-data.net",
+            "frame-src 'self' https://js.stripe.com https://checkout.stripe.com https://checkout.tokopay.id https://app.sandbox.midtrans.com https://app.midtrans.com",
             "object-src 'none'",
             "base-uri 'self'",
-            "form-action 'self' https://checkout.tokopay.id",
+            "form-action 'self' https://checkout.tokopay.id https://app.sandbox.midtrans.com https://app.midtrans.com",
             "frame-ancestors 'none'",
             "upgrade-insecure-requests"
         ];
