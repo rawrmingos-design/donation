@@ -319,7 +319,7 @@ export default function DonationCreate({ campaign, paymentProviders }: Props) {
                             
                             {campaign.featured_image && (
                                 <img
-                                    src={`/storage/${campaign.featured_image}`}
+                                    src={`/storage/campaigns/${campaign.featured_image}`}
                                     alt={campaign.title}
                                     className="w-full h-48 object-cover rounded-lg mb-4"
                                 />
