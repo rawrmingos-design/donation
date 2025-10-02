@@ -193,8 +193,8 @@ export interface BreadcrumbItem {
 
 export interface NavItem {
     title: string;
-    href: any;
-    icon: any;
+    href: string;
+    icon: React.ComponentType<{ className?: string }> | string;
 }
 
 

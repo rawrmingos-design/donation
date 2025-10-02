@@ -26,7 +26,7 @@ interface Props extends PageProps {
     categories: Category[];
 }
 
-export default function CreateCampaign({ auth, categories }: Props) {
+export default function CreateCampaign({ categories }: Props) {
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     
     const { data, setData, post, processing, errors, progress } = useForm({

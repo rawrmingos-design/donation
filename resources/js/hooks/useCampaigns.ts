@@ -1,10 +1,11 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiService, type CampaignFilters, type Campaign, type Category } from '@/services/api';
+import { useQuery } from '@tanstack/react-query';
+import { CampaignFilters, type Campaign } from '@/services/api';
 
 export const QUERY_KEYS = {
   campaigns: (filters?: CampaignFilters) => ['campaigns', filters],
   campaign: (id: number) => ['campaign', id],
   categories: () => ['categories'],
+  campaignDonations: (id: number) => ['campaignDonations', id],
 } as const;
 
 export function useCampaigns(filters: CampaignFilters = {}) {

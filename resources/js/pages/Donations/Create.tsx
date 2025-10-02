@@ -1,9 +1,8 @@
-import { Head, useForm } from '@inertiajs/react';
 import { Campaign, PaymentChannel } from '@/types';
 import { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import toast from 'react-hot-toast';
-
+import { useForm } from '@inertiajs/react';
 interface PaymentProvider {
     id: number;
     name: string;

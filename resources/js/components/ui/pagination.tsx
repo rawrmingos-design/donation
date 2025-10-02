@@ -9,7 +9,7 @@ interface PaginationLink {
 
 interface PaginationData {
     current_page: number;
-    data: any[];
+    data: unknown[];
     first_page_url: string;
     from: number;
     last_page: number;

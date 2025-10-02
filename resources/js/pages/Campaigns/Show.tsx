@@ -17,7 +17,7 @@ interface PaginatedData<T> {
     total: number;
     from: number;
     to: number;
-    links: any[];
+    links: { url: string | null; label: string; active: boolean }[];
     first_page_url: string;
     last_page_url: string;
     next_page_url: string | null;
@@ -32,14 +32,12 @@ interface Props {
     activePage: number;
     error: string | null;
     auth: {
-        user: any;
+        user: User;
     };
 }
 
-export default function CampaignShow({ campaign, donations, comments, activePage, error, auth }: Props) {
+export default function CampaignShow({ campaign, donations, comments, error, auth }: Props) {
     const [activeTab, setActiveTab] = useState('description');
-    const [currentDonationsPage, setCurrentDonationsPage] = useState(donations.current_page);
-    const [currentCommentsPage, setCurrentCommentsPage] = useState(comments.current_page);
     const [commentsData, setCommentsData] = useState(comments);
 
     // Handle comment added
@@ -416,11 +414,12 @@ function CommentForm({ campaignSlug, onCommentAdded }: CommentFormProps) {
                 setContent('');
                 toast.success(response.data.message);
             }
-        } catch (error: any) {
-            if (error.response?.status === 401) {
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+            if (axiosError.response?.status === 401) {
                 toast.error('Anda harus login untuk memberikan komentar');
-            } else if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
+            } else if (axiosError.response?.data?.message) {
+                toast.error(axiosError.response.data.message);
             } else {
                 toast.error('Terjadi kesalahan saat mengirim komentar');
             }
@@ -468,7 +467,7 @@ function CommentForm({ campaignSlug, onCommentAdded }: CommentFormProps) {
 interface CommentItemProps {
     comment: Comment;
     onCommentDeleted: (commentId: number) => void;
-    currentUser?: any;
+    currentUser?: User;
 }
 
 function CommentItem({ comment, onCommentDeleted, currentUser }: CommentItemProps) {
@@ -516,9 +515,10 @@ function CommentItem({ comment, onCommentDeleted, currentUser }: CommentItemProp
                     icon: '🗑️',
                 });
             }
-        } catch (error: any) {
-            if (error.response?.data?.message) {
-                toast.error(error.response.data.message);
+        } catch (error: unknown) {
+            const axiosError = error as { response?: { data?: { message?: string } } };
+            if (axiosError.response?.data?.message) {
+                toast.error(axiosError.response.data.message);
             } else {
                 toast.error('Terjadi kesalahan saat menghapus komentar');
             }

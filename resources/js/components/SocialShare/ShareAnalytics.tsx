@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 interface ShareStats {
     total_shares: number;
@@ -18,11 +18,7 @@ const ShareAnalytics: React.FC<ShareAnalyticsProps> = ({ campaignId, className =
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchShareStats();
-    }, [campaignId]);
-
-    const fetchShareStats = async () => {
+    const fetchShareStats = useCallback(async () => {
         try {
             setLoading(true);
             const response = await fetch(`/api/campaigns/${campaignId}/share-stats`);
@@ -38,7 +34,11 @@ const ShareAnalytics: React.FC<ShareAnalyticsProps> = ({ campaignId, className =
         } finally {
             setLoading(false);
         }
-    };
+    }, [campaignId]);
+
+    useEffect(() => {
+        fetchShareStats();
+    }, [fetchShareStats]);
 
     const getPlatformIcon = (platform: string) => {
         const icons: Record<string, string> = {

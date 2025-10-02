@@ -1,8 +1,6 @@
-import { Link } from '@inertiajs/react';
 import PublicLayout from '@/layouts/PublicLayout';
 
 export default function About() {
-    const date = new Date().getFullYear();
     return (
         <PublicLayout title="Tentang Kami" currentPage="about">
             <div className="py-12">

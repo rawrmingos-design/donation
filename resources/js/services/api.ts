@@ -95,18 +95,17 @@ class ApiService {
       if (filters.category && filters.category !== 'all') params.set('category', filters.category);
       if (filters.status && filters.status !== 'all') params.set('status', filters.status);
       if (filters.page) params.set('page', filters.page.toString());
-
       const url = params.toString() ? `${this.baseUrl}?${params.toString()}` : this.baseUrl;
 
       router.get(url, {}, {
         preserveState: true,
         preserveScroll: true,
-        only: ['campaigns', 'categories', 'filters'],
-        onSuccess: (page: any) => {
+        onSuccess: (page) => {
+          const props = page.props as unknown as { campaigns: PaginatedResponse<Campaign>; categories: Category[]; filters: CampaignFilters };
           resolve({
-            campaigns: page.props.campaigns,
-            categories: page.props.categories,
-            filters: page.props.filters,
+            campaigns: props.campaigns,
+            categories: props.categories,
+            filters: props.filters,
           });
         },
         onError: (errors) => {
@@ -121,8 +120,8 @@ class ApiService {
       router.get(`${this.baseUrl}/${id}`, {}, {
         preserveState: true,
         only: ['campaign'],
-        onSuccess: (page: any) => {
-          resolve(page.props.campaign);
+        onSuccess: (page) => {
+          resolve((page.props as unknown as { campaign: Campaign }).campaign);
         },
         onError: (errors) => {
           reject(new Error(Object.values(errors).join(', ')));
@@ -135,8 +134,8 @@ class ApiService {
     return new Promise((resolve, reject) => {
       router.get('/api/categories', {}, {
         preserveState: true,
-        onSuccess: (response: any) => {
-          resolve(response.data);
+        onSuccess: (page) => {
+          resolve((page.props as unknown as { data: Category[] }).data);
         },
         onError: (errors) => {
           reject(new Error(Object.values(errors).join(', ')));

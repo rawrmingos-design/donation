@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNotifications, Notification } from '../../hooks/useNotifications';
+import { useNotifications } from '../../hooks/useNotifications';
 import NotificationItem from './NotificationItem';
 import { Link } from '@inertiajs/react';
 

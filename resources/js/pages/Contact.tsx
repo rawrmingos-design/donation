@@ -1,4 +1,3 @@
-import { Link } from '@inertiajs/react';
 import PublicLayout from '@/layouts/PublicLayout';
 
 export default function Contact() {

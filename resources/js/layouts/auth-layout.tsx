@@ -1,4 +1,3 @@
-import AppLogoIcon from '@/components/app-logo-icon';
 import Notification from '@/components/notification';
 import { usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
@@ -8,9 +7,13 @@ interface AuthLayoutProps {
     description?: string;
 }
 
+interface AuthPageProps extends Record<string, unknown> {
+    errors?: Record<string, string>;
+}
+
 export default function AuthLayout({ children, title, description }: PropsWithChildren<AuthLayoutProps>) {
     const currentYear = new Date().getFullYear();
-    const { errors } = usePage().props as any;
+    const { errors } = usePage<AuthPageProps>().props;
 
     return (
         <div className="min-h-screen flex bg-gray-900">

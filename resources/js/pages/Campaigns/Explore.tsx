@@ -1,6 +1,6 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Link, router } from '@inertiajs/react';
 import { Campaign, Category } from '@/types';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import PublicLayout from '@/layouts/PublicLayout';
 import Pagination from '@/components/ui/pagination';
 
@@ -32,7 +32,6 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
     const [searchQuery, setSearchQuery] = useState(filters.search || '');
     const [selectedCategory, setSelectedCategory] = useState(filters.category || 'all');
     const [selectedStatus, setSelectedStatus] = useState(filters.status || 'all');
-    const [isInitialized, setIsInitialized] = useState(false);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
@@ -46,10 +45,6 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
         return target > 0 ? (collected / target) * 100 : 0;
     };
 
-    // Initialize component
-    useEffect(() => {
-        setIsInitialized(true);
-    }, []);
 
     // Handle search with manual debounce
     const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -71,7 +66,7 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
     };
 
     const handleFilterChange = () => {
-        const params: any = {};
+        const params: Record<string, string | number> = {};
         if (searchQuery) params.search = searchQuery;
         if (selectedCategory !== 'all') params.category = selectedCategory;
         if (selectedStatus !== 'all') params.status = selectedStatus;
@@ -86,7 +81,7 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
 
     const handleCategoryChange = (category: string) => {
         setSelectedCategory(category);
-        const params: any = {};
+        const params: Record<string, string | number> = {};
         if (searchQuery) params.search = searchQuery;
         if (category !== 'all') params.category = category;
         if (selectedStatus !== 'all') params.status = selectedStatus;
@@ -101,7 +96,7 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
 
     const handleStatusChange = (status: string) => {
         setSelectedStatus(status);
-        const params: any = {};
+        const params: Record<string, string | number> = {};
         if (searchQuery) params.search = searchQuery;
         if (selectedCategory !== 'all') params.category = selectedCategory;
         if (status !== 'all') params.status = status;
@@ -273,10 +268,10 @@ export default function CampaignsExplore({ campaigns, categories, filters }: Pro
 
                                             {/* Campaign Stats */}
                                             <div className="flex justify-between text-sm text-gray-400 mb-4">
-                                                <span>{(campaign as any).donors_count || 0} donatur</span>
+                                                <span>{campaign.donors_count || 0} donatur</span>
                                                 <span>
-                                                    {(campaign as any).deadline && new Date((campaign as any).deadline) > new Date() 
-                                                        ? `${Math.ceil((new Date((campaign as any).deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} hari lagi`
+                                                    {campaign.deadline && new Date(campaign.deadline) > new Date() 
+                                                        ? `${Math.ceil((new Date(campaign.deadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} hari lagi`
                                                         : 'Tidak terbatas'
                                                     }
                                                 </span>

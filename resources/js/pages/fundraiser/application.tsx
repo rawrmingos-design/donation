@@ -41,7 +41,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function FundraiserApplication({ application }: Props) {
-    const { data, setData, post, put, processing, errors, reset } = useForm({
+    const { data, setData, post, put, processing, errors } = useForm({
         full_name: application?.full_name || '',
         phone: application?.phone || '',
         address: application?.address || '',

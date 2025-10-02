@@ -1,12 +1,13 @@
 import { Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { PageProps } from '@/types';
 
 interface PublicNavigationProps {
     currentPage?: string;
 }
 
 export default function PublicNavigation({ currentPage }: PublicNavigationProps) {
-    const { auth } = usePage().props as any;
+    const { auth } = usePage<PageProps>().props;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const isActive = (page: string) => currentPage === page;
 

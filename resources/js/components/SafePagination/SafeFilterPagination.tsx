@@ -1,22 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 
+interface FilterObject {
+    search?: string;
+    category?: string;
+    status?: string;
+    [key: string]: string | number | boolean | undefined;
+}
+
 interface SafeFilterPaginationProps {
-    initialFilters: {
-        search?: string;
-        category?: string;
-        status?: string;
-        [key: string]: any;
-    };
+    initialFilters: FilterObject;
     route: string;
-    onFiltersChange?: (filters: any) => void;
+    onFiltersChange?: (filters: Record<string, string | number>) => void;
     debounceMs?: number;
     children: (props: {
-        filters: any;
+        filters: FilterObject;
         setSearch: (value: string) => void;
         setCategory: (value: string) => void;
         setStatus: (value: string) => void;
-        setFilter: (key: string, value: any) => void;
+        setFilter: (key: string, value: string | number | boolean | undefined) => void;
         handleFilterChange: () => void;
     }) => React.ReactNode;
 }
@@ -60,31 +62,13 @@ export default function SafeFilterPagination({
         setIsInitialized(true);
     }, []);
 
-    // Handle filter changes with debounce for search
-    useEffect(() => {
-        if (!isInitialized) return; // CRITICAL: Prevent initial trigger
-        
-        const timeoutId = setTimeout(() => {
-            handleFilterChange();
-        }, debounceMs);
-        
-        return () => clearTimeout(timeoutId);
-    }, [filters.search, isInitialized]);
-
-    // Handle non-search filters immediately
-    useEffect(() => {
-        if (!isInitialized) return; // CRITICAL: Prevent initial trigger
-        
-        handleFilterChange();
-    }, [filters.category, filters.status, isInitialized]);
-
-    const handleFilterChange = () => {
-        const params: any = {};
+    const handleFilterChange = React.useCallback(() => {
+        const params: Record<string, string | number> = {};
         
         // Add all non-empty filters
         Object.keys(filters).forEach(key => {
             const value = filters[key];
-            if (value && value !== 'all' && value !== '') {
+            if (value && value !== 'all' && value !== '' && typeof value !== 'boolean') {
                 params[key] = value;
             }
         });
@@ -102,7 +86,25 @@ export default function SafeFilterPagination({
             preserveState: true,
             preserveScroll: true,
         });
-    };
+    }, [filters, onFiltersChange, route]);
+
+    // Handle filter changes with debounce for search
+    useEffect(() => {
+        if (!isInitialized) return; // CRITICAL: Prevent initial trigger
+        
+        const timeoutId = setTimeout(() => {
+            handleFilterChange();
+        }, debounceMs);
+        
+        return () => clearTimeout(timeoutId);
+    }, [filters.search, isInitialized, debounceMs, handleFilterChange]);
+
+    // Handle non-search filters immediately
+    useEffect(() => {
+        if (!isInitialized) return; // CRITICAL: Prevent initial trigger
+        
+        handleFilterChange();
+    }, [filters.category, filters.status, isInitialized, handleFilterChange]);
 
     // Helper functions for common filter types
     const setSearch = (value: string) => {
@@ -117,7 +119,7 @@ export default function SafeFilterPagination({
         setFilters(prev => ({ ...prev, status: value }));
     };
 
-    const setFilter = (key: string, value: any) => {
+    const setFilter = (key: string, value: string | number | boolean | undefined) => {
         setFilters(prev => ({ ...prev, [key]: value }));
     };
 

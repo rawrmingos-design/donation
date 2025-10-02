@@ -41,7 +41,7 @@ export default function DonationSuccess({ transaction }: Props) {
                 icon: '⏳',
             });
         }
-    }, [transaction.status]);
+    }, [transaction.status, transaction.donation.amount]);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('id-ID', {
